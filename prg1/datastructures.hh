@@ -1,8 +1,8 @@
 // Datastructures.hh
 //
-// Student name:
-// Student email:
-// Student number:
+// Student name: Nicklas Fianda
+// Student email: nicklas.fianda@tuni.fi
+// Student number: 296255
 
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
@@ -14,6 +14,7 @@
 #include <limits>
 #include <functional>
 #include <exception>
+#include <unordered_set>
 
 // Types for IDs
 using TownID = std::string;
@@ -179,6 +180,17 @@ public:
 
 private:
     // Add stuff needed for your class implementation here
+
+    //Create empty unordered_set for towns
+    struct Town
+    {
+      	std::string town_id;
+      	std::string name;
+        Coord coord;
+        int tax;
+    };
+    std::unordered_set<std::pair<Town,Town>, CoordHash*CoordHash> vassals;
+    std::unordered_set<Town, CoordHash> towns;
 
 };
 

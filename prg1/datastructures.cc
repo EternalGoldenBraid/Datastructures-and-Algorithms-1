@@ -1,8 +1,9 @@
 // Datastructures.cc
 //
 // Student name:
-// Student email:
-// Student number:
+// Student name: Nicklas Fianda
+// Student email: nicklas.fianda@tuni.fi
+// Student number: 296255
 
 #include "datastructures.hh"
 
