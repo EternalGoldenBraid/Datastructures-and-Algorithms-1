@@ -182,14 +182,20 @@ private:
     // Add stuff needed for your class implementation here
 
     //Create empty unordered_set for towns
+    //struct Town;
     struct Town
     {
-      	std::string town_id;
-      	std::string name;
+      	TownID town_id;
+      	Name name;
         Coord coord;
         int tax;
     };
-    std::unordered_set<std::pair<Town,Town>, CoordHash*CoordHash> vassals;
+    // f(.) some function of the hashesh of both?
+    //std::unordered_set<std::pair<Town,Town>, f(CoordHash)> vassals;
+    // Store information of master-vassall relationship.
+    // Hash with the vassal hash, i.e. information retrieval
+    // retrieves master of key.
+    std::unordered_set<std::pair<Town,Town>, CoordHash> town_vassal;
     std::unordered_set<Town, CoordHash> towns;
 
 };
