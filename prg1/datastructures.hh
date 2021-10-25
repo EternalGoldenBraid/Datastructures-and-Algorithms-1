@@ -195,8 +195,8 @@ private:
     // Store information of master-vassall relationship.
     // Hash with the vassal hash, i.e. information retrieval
     // retrieves master of key.
-    std::unordered_set<std::pair<Town,Town>, CoordHash> town_vassal;
-    std::unordered_set<Town, CoordHash> towns;
+    std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
+    std::unordered_map<Coord, Town> towns;
 
 };
 

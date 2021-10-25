@@ -1,6 +1,5 @@
 // Datastructures.cc
 //
-// Student name:
 // Student name: Nicklas Fianda
 // Student email: nicklas.fianda@tuni.fi
 // Student number: 296255
@@ -32,15 +31,14 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Write any initialization you need here
-    using relation = std::unordered_set<std::pair<Town,Town>, CoordHash>;
-    relation town_vassal;
+    //using relation = std::unordered_set<std::pair<Coord,Coord>, CoordHash>;
+    //relation town_vassal;
     //std::unordered_set<Town, CoordHash> towns = {};
-    //Datastructures::towns = {};
+    Datastructures::towns = {};
 
 }
 
-Datastructures::~Datastructures()
-{
+Datastructures::~Datastructures() {
     // Write any cleanup you need here
 }
 
@@ -65,11 +63,7 @@ bool Datastructures::add_town(TownID id, const Name &name,
 
     Datastructures::Town new_town = {.town_id=id,.name=name,
                                     .coord=coord,.tax=tax};
-	//auto new_town = {.town_id=id,.name=name,.coord=coord,.tax=tax};
-    //CoordHash new_hash;
-    //new_hash(new_town.coord);
-    //towns.insert(new_town);
-    towns.insert(new_town);
+    towns[new_town.cood] = new_town;
 
     return false;
     
