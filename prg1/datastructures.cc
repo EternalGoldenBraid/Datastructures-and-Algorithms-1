@@ -31,10 +31,7 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Write any initialization you need here
-    //using relation = std::unordered_set<std::pair<Coord,Coord>, CoordHash>;
-    //relation town_vassal;
-    //std::unordered_set<Town, CoordHash> towns = {};
-    Datastructures::towns = {};
+    std::unordered_map<Coord, Town, CoordHash> towns = {};
 
 }
 
@@ -63,7 +60,7 @@ bool Datastructures::add_town(TownID id, const Name &name,
 
     Datastructures::Town new_town = {.town_id=id,.name=name,
                                     .coord=coord,.tax=tax};
-    towns[new_town.cood] = new_town;
+    towns[new_town.coord] = new_town;
 
     return false;
     
