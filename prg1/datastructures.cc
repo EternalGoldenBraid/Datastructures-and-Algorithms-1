@@ -9,6 +9,8 @@
 #include <random>
 
 #include <cmath>
+#include <stdexcept>
+#include <iterator>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -31,7 +33,7 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Write any initialization you need here
-    std::unordered_map<Coord, Town, CoordHash> towns = {};
+    std::unordered_map<TownID, Town> towns = {};
 
 }
 
@@ -54,44 +56,56 @@ void Datastructures::clear_all()
 bool Datastructures::add_town(TownID id, const Name &name,
    				 Coord coord, int tax)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    //throw NotImplemented("add_town()");
-
     Datastructures::Town new_town = {.town_id=id,.name=name,
                                     .coord=coord,.tax=tax};
-    towns[new_town.coord] = new_town;
-
-    return false;
+    auto found = towns.emplace(new_town.town_id, new_town);
+    return found.second;
     
 
 }
 
-Name Datastructures::get_town_name(TownID /*id*/)
+Name Datastructures::get_town_name(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_town_name()");
+    Name name;
+    try {
+        name = towns.at(id).name;
+    } 
+    catch(std::out_of_range& e) {
+        return NO_NAME;
+    }
+    return name;
 }
 
-Coord Datastructures::get_town_coordinates(TownID /*id*/)
+Coord Datastructures::get_town_coordinates(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_town_coordinates()");
+    Coord coord;
+    try {
+        coord = towns.at(id).coord;
+    } 
+    catch(std::out_of_range& e) {
+        return NO_COORD;
+    }
+    return coord;
 }
 
-int Datastructures::get_town_tax(TownID /*id*/)
+int Datastructures::get_town_tax(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_town_tax()");
+    int tax;
+    try {
+        tax = towns.at(id).tax;
+    } 
+    catch(std::out_of_range& e) {
+        return NO_VALUE;
+    }
+    return tax;
 }
 
 std::vector<TownID> Datastructures::all_towns()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("all_towns()");
+    std::vector<TownID> ids;
+    ids.reserve(towns.size());
+    for (const auto [id, _]:towns) ids.push_back(id);
+    return ids;
 }
 
 std::vector<TownID> Datastructures::find_towns(const Name &/*name*/)

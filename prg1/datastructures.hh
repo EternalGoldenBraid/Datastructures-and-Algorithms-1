@@ -104,24 +104,31 @@ public:
     // Short rationale for estimate:
     void clear_all();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Insertion of elements for unordered_map
+    // has amortized constan average.
+    // Checking for already existing towns is linear in worst case.
+    // Short rationale for estimate: Due to STL hash_bucket implementation.
     bool add_town(TownID id, Name const& name, Coord coord, int tax);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Search of elements for unordered_map
+    // have average constant-time complexity.
+    // If town doesn't exist the performance is linear in worst case.
+    // Short rationale for estimate: Due to STL hash_bucket implementation.
     Name get_town_name(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Search of elements for unordered_map
+    // have average constant-time complexity.
+    // If town doesn't exist the performance is linear in worst case.
+    // Short rationale for estimate: Due to STL hash_bucket implementation.
     Coord get_town_coordinates(TownID id);
 
     // Estimate of performance:
     // Short rationale for estimate:
     int get_town_tax(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: average linear in number of towns.
+    // Short rationale for estimate: For loop through the container 
+    // containing the TownIDs
     std::vector<TownID> all_towns();
 
     // Estimate of performance:
@@ -196,7 +203,7 @@ private:
     // Hash with the vassal hash, i.e. information retrieval
     // retrieves master of key.
     std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
-    std::unordered_map<Coord, Town> towns;
+    std::unordered_map<TownID, Town> towns;
 
 };
 
