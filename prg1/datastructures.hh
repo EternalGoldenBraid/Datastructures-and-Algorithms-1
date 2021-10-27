@@ -100,38 +100,32 @@ public:
     // Short rationale for estimate:
     unsigned int town_count();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Linear in number of towns.
+    // Short rationale for estimate: So described in cppreference.com
+    // for unsorted_map::clear();
     void clear_all();
 
-    // Estimate of performance: Insertion of elements for unordered_map
-    // has amortized constan average.
-    // Checking for already existing towns is linear in worst case.
-    // Short rationale for estimate: Due to STL hash_bucket implementation.
+    // Estimate of performance:
+    // Short rationale for estimate:
     bool add_town(TownID id, Name const& name, Coord coord, int tax);
 
-    // Estimate of performance: Search of elements for unordered_map
-    // have average constant-time complexity.
-    // If town doesn't exist the performance is linear in worst case.
-    // Short rationale for estimate: Due to STL hash_bucket implementation.
+    // Estimate of performance:
+    // Short rationale for estimate:
     Name get_town_name(TownID id);
 
-    // Estimate of performance: Search of elements for unordered_map
-    // have average constant-time complexity.
-    // If town doesn't exist the performance is linear in worst case.
-    // Short rationale for estimate: Due to STL hash_bucket implementation.
+    // Estimate of performance:
+    // Short rationale for estimate:
     Coord get_town_coordinates(TownID id);
 
     // Estimate of performance:
     // Short rationale for estimate:
     int get_town_tax(TownID id);
 
-    // Estimate of performance: average linear in number of towns.
-    // Short rationale for estimate: For loop through the container 
-    // containing the TownIDs
+    // Estimate of performance:
+    // Short rationale for estimate:
     std::vector<TownID> all_towns();
 
-    // Estimate of performance:
+    // Estimate of performance: Average linear time complexity.
     // Short rationale for estimate:
     std::vector<TownID> find_towns(Name const& name);
 

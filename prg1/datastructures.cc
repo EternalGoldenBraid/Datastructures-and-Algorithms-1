@@ -8,6 +8,7 @@
 
 #include <random>
 
+#include <iostream>
 #include <cmath>
 #include <stdexcept>
 #include <iterator>
@@ -43,14 +44,12 @@ Datastructures::~Datastructures() {
 
 unsigned int Datastructures::town_count()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("town_count()");
+    return towns.size();
 }
 
 void Datastructures::clear_all()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("clear_all()");
+    towns.clear();
 }
 
 bool Datastructures::add_town(TownID id, const Name &name,
@@ -108,11 +107,20 @@ std::vector<TownID> Datastructures::all_towns()
     return ids;
 }
 
-std::vector<TownID> Datastructures::find_towns(const Name &/*name*/)
+std::vector<TownID> Datastructures::find_towns(const Name &name)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("find_towns()");
+    std::vector<TownID> found = {};
+
+    for ( auto town:towns) {
+        if (town.second.name == name){
+            found.push_back(name);
+        }
+    }
+
+    for ( auto f : found){
+        std::cout << f<< std::endl;
+    }
+    return found;
 }
 
 bool Datastructures::change_town_name(TownID /*id*/, const Name &/*newname*/)
