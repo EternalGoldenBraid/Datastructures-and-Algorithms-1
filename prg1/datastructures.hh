@@ -14,7 +14,9 @@
 #include <limits>
 #include <functional>
 #include <exception>
+#include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 // Types for IDs
 using TownID = std::string;
@@ -96,8 +98,9 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Constant time
+    // Short rationale for estimate: std::unosrted_map::size() so 
+    // described in cppref.
     unsigned int town_count();
 
     // Estimate of performance: Linear in number of towns.
@@ -105,32 +108,43 @@ public:
     // for unsorted_map::clear();
     void clear_all();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Amortized constant on average,
+    // worst case linear in the size of the container.
+    // Short rationale for estimate: Linear if town already exists.
+    // from cppreference for std::unordered_map::emplace
     bool add_town(TownID id, Name const& name, Coord coord, int tax);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance:  Average constant time complexity
+    // for search of the town. Acessing struct Town.name is constant time.
+    // Short rationale for estimate: So promised by cppref. for 
+    // std::unsorted_map
     Name get_town_name(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance:  Average constant time complexity
+    // for search of the town. Acessing struct Town.coord is constant time.
+    // Short rationale for estimate: So promised by cppref. for 
+    // std::unsorted_map
     Coord get_town_coordinates(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance:  Average constant time complexity
+    // for search of the town. Acessing struct Town.tax is constant time.
+    // Short rationale for estimate: So promised by cppref. for 
+    // std::unsorted_map
     int get_town_tax(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Linear in number of towns.
+    // Short rationale for estimate: Simple for loop through
+    // unsorted_map.
     std::vector<TownID> all_towns();
 
     // Estimate of performance: Average linear time complexity.
-    // Short rationale for estimate:
+    // Short rationale for estimate: Looping through std::unsorted_map
     std::vector<TownID> find_towns(Name const& name);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance:  Average constant time complexity
+    // for search of the town. Acessing struct Town.name is constant time.
+    // Short rationale for estimate: So promised by cppref. for 
+    // std::unsorted_map
     bool change_town_name(TownID id, Name const& newname);
 
     // Estimate of performance:
@@ -198,6 +212,9 @@ private:
     // retrieves master of key.
     std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
     std::unordered_map<TownID, Town> towns;
+
+    std::set<TownID> towns_alpha_sorted;
+    std::set<TownID> towns_added;
 
 };
 

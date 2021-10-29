@@ -34,7 +34,9 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Write any initialization you need here
-    std::unordered_map<TownID, Town> towns = {};
+    //std::unordered_map<TownID, Town> towns = {};
+    towns = {};
+    towns_added = {};
 
 }
 
@@ -57,8 +59,11 @@ bool Datastructures::add_town(TownID id, const Name &name,
 {
     Datastructures::Town new_town = {.town_id=id,.name=name,
                                     .coord=coord,.tax=tax};
-    auto found = towns.emplace(new_town.town_id, new_town);
-    return found.second;
+    auto found = (towns.emplace(new_town.town_id, new_town)).second;
+    if (!found) {
+        towns_added.emplace(new_town.town_id);
+    }
+    return found;
     
 
 }
@@ -67,11 +72,15 @@ Name Datastructures::get_town_name(TownID id)
 {
     Name name;
     try {
+        // DEBUG
+        std::cout << "Attempting to find town: " << id << std::endl;
+        // END DEBUG
         name = towns.at(id).name;
     } 
     catch(std::out_of_range& e) {
         return NO_NAME;
     }
+    
     return name;
 }
 
@@ -117,23 +126,40 @@ std::vector<TownID> Datastructures::find_towns(const Name &name)
         }
     }
 
+    // DEBUG FOUND TOWNS
+    std::cout << "Found towns: " << std::endl;
     for ( auto f : found){
         std::cout << f<< std::endl;
     }
+    // END DEBUG
     return found;
 }
 
-bool Datastructures::change_town_name(TownID /*id*/, const Name &/*newname*/)
+bool Datastructures::change_town_name(TownID id, const Name &newname)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("change_town_name()");
+    try {
+        (&towns.at(id))->name = newname;
+    }
+    catch(std::out_of_range &e) {return false;}
+    return true;
 }
 
 std::vector<TownID> Datastructures::towns_alphabetically()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("towns_alphabetically()");
+    std::vector<TownID> ids;
+    ids.reserve(towns.size());
+    if (!towns_added.empty()) {
+        while (!towns_added.empty()) {
+            auto itr = towns_added.begin();
+            towns_alpha_sorted.emplace(*itr);
+            itr++;
+        }
+        //auto comp = [&](TownID a, TownID b){ 
+        //    return towns.at(a).name > towns.at(b).name;
+        //};
+        //std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
+                //comp);
+    }
 }
 
 std::vector<TownID> Datastructures::towns_distance_increasing()
