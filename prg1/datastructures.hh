@@ -213,8 +213,18 @@ private:
     std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
     std::unordered_map<TownID, Town> towns;
 
-    std::set<TownID> towns_alpha_sorted;
-    std::set<TownID> towns_added;
+    //struct AlphaComp
+    //{
+    //    operator() (const TownID &a, const TownID &b) const {
+    //        return towns.at(a).name > towns.at(b).name;
+
+    //    }
+
+    //};
+    //std::set<TownID, AlphaComp> towns_alpha_sorted;
+    //std::set<TownID> towns_added;
+    std::vector<TownID> towns_alpha_sorted;
+    std::unordered_set<TownID> towns_added;
 
 };
 

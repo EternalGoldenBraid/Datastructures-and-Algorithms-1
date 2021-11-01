@@ -59,11 +59,18 @@ bool Datastructures::add_town(TownID id, const Name &name,
 {
     Datastructures::Town new_town = {.town_id=id,.name=name,
                                     .coord=coord,.tax=tax};
-    auto found = (towns.emplace(new_town.town_id, new_town)).second;
-    if (!found) {
+    bool is_added = (towns.emplace(new_town.town_id, new_town)).second;
+    if (is_added) {
         towns_added.emplace(new_town.town_id);
+
+        // DEBUG FOUND TOWNS
+        std::cout << "Awaiting alpha: " << std::endl;
+        for ( auto f : towns_added ){
+            std::cout << f<< std::endl;
+        }
+        // END DEBUG
     }
-    return found;
+    return is_added;
     
 
 }
@@ -112,7 +119,7 @@ std::vector<TownID> Datastructures::all_towns()
 {
     std::vector<TownID> ids;
     ids.reserve(towns.size());
-    for (const auto [id, _]:towns) ids.push_back(id);
+    for (const auto &[id, _]:towns) ids.push_back(id);
     return ids;
 }
 
@@ -120,7 +127,7 @@ std::vector<TownID> Datastructures::find_towns(const Name &name)
 {
     std::vector<TownID> found = {};
 
-    for ( auto town:towns) {
+    for ( auto &town:towns) {
         if (town.second.name == name){
             found.push_back(name);
         }
@@ -146,20 +153,39 @@ bool Datastructures::change_town_name(TownID id, const Name &newname)
 
 std::vector<TownID> Datastructures::towns_alphabetically()
 {
-    std::vector<TownID> ids;
-    ids.reserve(towns.size());
+
+        // DEBUG
+        std::cout << "Towns missing from alpha" << std::endl;
+        for (auto a : towns_added) {
+            std::cout << a << std::endl;
+        }
+
+        // END DEBUG
     if (!towns_added.empty()) {
-        while (!towns_added.empty()) {
-            auto itr = towns_added.begin();
-            towns_alpha_sorted.emplace(*itr);
+        towns_alpha_sorted.resize(towns_alpha_sorted.size()+towns_added.size());
+        auto itr = towns_added.begin();
+        while (itr != towns_added.end()) {
+            towns_alpha_sorted.emplace_back(*itr);
             itr++;
         }
-        //auto comp = [&](TownID a, TownID b){ 
-        //    return towns.at(a).name > towns.at(b).name;
-        //};
-        //std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
-                //comp);
+        auto comp = [&](TownID a, TownID b){ 
+                return towns.at(a).name > towns.at(b).name;
+        };
+        std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
+                comp);
+        // DEBUG
+        std::cout << "Towns alpha: " << std::endl;
+        for (auto a : towns_alpha_sorted) {
+            std::cout << a << std::endl;
+        }
+        // END DEBUG
+        
+        //std::vector<TownID> ids;
+        //ids.reserve(towns.size());
+        //std::copy(towns_alpha_sorted.begin(), towns_alpha_sorted.end(),ids.begin());
+        //towns_added.clear();
     }
+    return towns_alpha_sorted;
 }
 
 std::vector<TownID> Datastructures::towns_distance_increasing()
