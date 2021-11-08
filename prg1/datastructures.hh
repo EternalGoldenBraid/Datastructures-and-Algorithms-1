@@ -147,8 +147,10 @@ public:
     // std::unsorted_map
     bool change_town_name(TownID id, Name const& newname);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n(log(n)) only when new towns have been added
+    // before previous call.
+    // Short rationale for estimate: TownID's are kept in an array sorted 
+    // using std::sort() and sorted by town.name.
     std::vector<TownID> towns_alphabetically();
 
     // Estimate of performance:
@@ -213,14 +215,6 @@ private:
     std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
     std::unordered_map<TownID, Town> towns;
 
-    //struct AlphaComp
-    //{
-    //    operator() (const TownID &a, const TownID &b) const {
-    //        return towns.at(a).name > towns.at(b).name;
-
-    //    }
-
-    //};
     //std::set<TownID, AlphaComp> towns_alpha_sorted;
     //std::set<TownID> towns_added;
     std::vector<TownID> towns_alpha_sorted;

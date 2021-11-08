@@ -12,6 +12,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <iterator>
+#include <algorithm>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -37,6 +38,7 @@ Datastructures::Datastructures()
     //std::unordered_map<TownID, Town> towns = {};
     towns = {};
     towns_added = {};
+    towns_alpha_sorted = {};
 
 }
 
@@ -154,36 +156,22 @@ bool Datastructures::change_town_name(TownID id, const Name &newname)
 std::vector<TownID> Datastructures::towns_alphabetically()
 {
 
-        // DEBUG
-        std::cout << "Towns missing from alpha" << std::endl;
-        for (auto a : towns_added) {
-            std::cout << a << std::endl;
-        }
-
-        // END DEBUG
     if (!towns_added.empty()) {
-        towns_alpha_sorted.resize(towns_alpha_sorted.size()+towns_added.size());
+
+        towns_alpha_sorted.reserve(alpha_sz+added_sz);
+
         auto itr = towns_added.begin();
         while (itr != towns_added.end()) {
             towns_alpha_sorted.emplace_back(*itr);
             itr++;
         }
         auto comp = [&](TownID a, TownID b){ 
-                return towns.at(a).name > towns.at(b).name;
+                return towns.at(a).name < towns.at(b).name;
         };
         std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
                 comp);
-        // DEBUG
-        std::cout << "Towns alpha: " << std::endl;
-        for (auto a : towns_alpha_sorted) {
-            std::cout << a << std::endl;
-        }
-        // END DEBUG
         
-        //std::vector<TownID> ids;
-        //ids.reserve(towns.size());
-        //std::copy(towns_alpha_sorted.begin(), towns_alpha_sorted.end(),ids.begin());
-        //towns_added.clear();
+        towns_added.clear();
     }
     return towns_alpha_sorted;
 }

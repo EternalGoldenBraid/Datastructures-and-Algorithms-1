@@ -1,4 +1,6 @@
 read "test-data.txt"
-town_count
 all_towns
+towns_alphabetically
+add_town NEW1 new1 (2,5) 10
+add_town NEW2 new2 (3,5) 10
 
