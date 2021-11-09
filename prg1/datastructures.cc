@@ -37,8 +37,11 @@ Datastructures::Datastructures()
     // Write any initialization you need here
     //std::unordered_map<TownID, Town> towns = {};
     towns = {};
-    towns_added = {};
+    towns_added_alpha = {};
     towns_alpha_sorted = {};
+
+    towns_added_dist = {};
+    towns_dist_sorted = {};
 
 }
 
@@ -63,11 +66,12 @@ bool Datastructures::add_town(TownID id, const Name &name,
                                     .coord=coord,.tax=tax};
     bool is_added = (towns.emplace(new_town.town_id, new_town)).second;
     if (is_added) {
-        towns_added.emplace(new_town.town_id);
+        towns_added_alpha.emplace(new_town.town_id);
+        towns_added_dist.emplace(new_town.town_id);
 
         // DEBUG FOUND TOWNS
         std::cout << "Awaiting alpha: " << std::endl;
-        for ( auto f : towns_added ){
+        for ( auto f : towns_added_alpha ){
             std::cout << f<< std::endl;
         }
         // END DEBUG
@@ -156,12 +160,14 @@ bool Datastructures::change_town_name(TownID id, const Name &newname)
 std::vector<TownID> Datastructures::towns_alphabetically()
 {
 
-    if (!towns_added.empty()) {
+    if (!towns_added_alpha.empty()) {
 
+        size_t alpha_sz = towns_alpha_sorted.size();
+        size_t added_sz = towns_added_alpha.size();
         towns_alpha_sorted.reserve(alpha_sz+added_sz);
 
-        auto itr = towns_added.begin();
-        while (itr != towns_added.end()) {
+        auto itr = towns_added_alpha.begin();
+        while (itr != towns_added_alpha.end()) {
             towns_alpha_sorted.emplace_back(*itr);
             itr++;
         }
@@ -171,27 +177,67 @@ std::vector<TownID> Datastructures::towns_alphabetically()
         std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
                 comp);
         
-        towns_added.clear();
+        towns_added_alpha.clear();
     }
     return towns_alpha_sorted;
 }
 
+Distance Datastructures::dist(TownID &a){
+
+    using namespace std;
+    auto coord_a = towns.at(a).coord;
+    auto dist_a = sqrt(pow(coord_a.x,2) + pow(coord_a.y,2));
+    return dist_a;
+
+}
+
+void Datastructures::sort_by_distance() {
+
+    size_t dist_sz = towns_alpha_sorted.size();
+    size_t added_sz = towns_added_dist.size();
+    towns_dist_sorted.reserve(dist_sz+added_sz);
+    
+    auto itr = towns_added_dist.begin();
+    while (itr != towns_added_dist.end()) {
+        towns_dist_sorted.emplace_back(*itr);
+        itr++;
+    }
+    
+    auto comp = [&](TownID a, TownID b){ 
+            auto dist_a = dist(a);
+            auto dist_b = dist(b);
+            return dist_a < dist_b;
+    };
+    
+    
+    std::sort(towns_dist_sorted.begin(),towns_dist_sorted.end(),
+            comp);
+    
+    towns_added_dist.clear();
+
+}
 std::vector<TownID> Datastructures::towns_distance_increasing()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("towns_distance_increasing()");
+    if (!towns_added_dist.empty()) {
+        sort_by_distance();
+    }
+    return towns_dist_sorted;
 }
 
 TownID Datastructures::min_distance()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("min_distance()");
+    if (!towns_added_dist.empty()) {
+        sort_by_distance();
+    }
+    return towns_dist_sorted.front();
 }
 
 TownID Datastructures::max_distance()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("max_distance()");
+    if (!towns_added_dist.empty()) {
+        sort_by_distance();
+    }
+    return towns_dist_sorted.back();
 }
 
 bool Datastructures::add_vassalship(TownID /*vassalid*/, TownID /*masterid*/)
@@ -208,11 +254,13 @@ std::vector<TownID> Datastructures::get_town_vassals(TownID /*id*/)
     throw NotImplemented("get_town_vassals()");
 }
 
-std::vector<TownID> Datastructures::taxer_path(TownID /*id*/)
+std::vector<TownID> Datastructures::taxer_path(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("taxer_path()");
+    std::vector<TownID> foo;
+    
+    if town.at(i
+    
+    return foo;
 }
 
 bool Datastructures::remove_town(TownID /*id*/)

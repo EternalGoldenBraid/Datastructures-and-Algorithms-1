@@ -153,16 +153,32 @@ public:
     // using std::sort() and sorted by town.name.
     std::vector<TownID> towns_alphabetically();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n(log(n)) only when new towns have been added
+    // before previous call.
+    // Constant when array is already sorted, array is always sorted after an
+    // element not currently in sorted array exists.
+    // Short rationale for estimate: TownID's are kept in an array sorted 
+    // using std::sort() and sorted by distance.
     std::vector<TownID> towns_distance_increasing();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n(log(n)) only when new towns have been added
+    // before previous call.
+    // Constant when array is already sorted, array is always sorted after an
+    // Short rationale for estimate: TownID's are kept in an array sorted 
+    // using std::sort() and sorted by distance.
+    // Opted to sort the array instead of std::nth_element [ O(nlog(n)) vs .O(n)]
+    // since accessing after the sorting is always constant time and sorted
+    // array is also used by towns_distance_increasing.
     TownID min_distance();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n(log(n)) only when new towns have been added
+    // before previous call.
+    // Constant when array is already sorted, array is always sorted after an
+    // Short rationale for estimate: TownID's are kept in an array sorted 
+    // using std::sort() and sorted by distance.
+    // Opted to sort the array instead of std::nth_element [ O(nlog(n)) vs .O(n)]
+    // since accessing after the sorting is always constant time and sorted
+    // array is also used by towns_distance_increasing.
     TownID max_distance();
 
     // Estimate of performance:
@@ -198,6 +214,8 @@ public:
 private:
     // Add stuff needed for your class implementation here
 
+    Distance dist(TownID &id);
+    void sort_by_distance();
     //Create empty unordered_set for towns
     //struct Town;
     struct Town
@@ -218,7 +236,10 @@ private:
     //std::set<TownID, AlphaComp> towns_alpha_sorted;
     //std::set<TownID> towns_added;
     std::vector<TownID> towns_alpha_sorted;
-    std::unordered_set<TownID> towns_added;
+    std::unordered_set<TownID> towns_added_alpha;
+
+    std::vector<TownID> towns_dist_sorted;
+    std::unordered_set<TownID> towns_added_dist;
 
 };
 
