@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <memory>
 
 // Types for IDs
 using TownID = std::string;
@@ -214,23 +215,56 @@ public:
 private:
     // Add stuff needed for your class implementation here
 
+
     Distance dist(TownID &id);
     void sort_by_distance();
-    //Create empty unordered_set for towns
-    //struct Town;
+
+    struct Town;
+
+    class IdHash {
+        public:
+            size_t operator()(const TownID &id ) const{
+                std::hash<std::string> hasher;
+                return hasher(id);
+            }
+    };
+
+    class IdHash_ptr {
+        public:
+            size_t operator()(const Town *t) const{
+            //size_t operator()(const std::unique_ptr<Town> &t) const{
+                std::hash<std::string> hasher;
+
+                if (not t) return 0; 
+                return hasher(t->town_id);
+            }
+    };
+
     struct Town
     {
       	TownID town_id;
       	Name name;
         Coord coord;
         int tax;
+
+        //Town master;
+        //std::unordered_set<Town, IdHash> vassals;
+
+        Town *master;
+        std::unordered_set<Town*, IdHash_ptr> vassals;
+        //std::unordered_set<TownID, IdHash> vassals_id;
+        std::vector<TownID> vassals_id;
+
+        //std::unique_ptr<Town> master;
+        //std::unordered_set<std::unique_ptr<Town>, IdHash> vassals;
     };
+
+
     // f(.) some function of the hashesh of both?
     //std::unordered_set<std::pair<Town,Town>, f(CoordHash)> vassals;
     // Store information of master-vassall relationship.
     // Hash with the vassal hash, i.e. information retrieval
     // retrieves master of key.
-    std::unordered_set<std::pair<Coord,Coord>, CoordHash> town_vassal;
     std::unordered_map<TownID, Town> towns;
 
     //std::set<TownID, AlphaComp> towns_alpha_sorted;
@@ -240,6 +274,10 @@ private:
 
     std::vector<TownID> towns_dist_sorted;
     std::unordered_set<TownID> towns_added_dist;
+
+    // A hint for the longest path of master-vassal relationships
+    // used for reserving space for relevant vectors.
+    size_t known_depth;
 
 };
 

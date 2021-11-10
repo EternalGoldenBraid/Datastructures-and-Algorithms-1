@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
+#include <memory>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -43,6 +44,7 @@ Datastructures::Datastructures()
     towns_added_dist = {};
     towns_dist_sorted = {};
 
+    size_t known_depth = 0;
 }
 
 Datastructures::~Datastructures() {
@@ -63,7 +65,11 @@ bool Datastructures::add_town(TownID id, const Name &name,
    				 Coord coord, int tax)
 {
     Datastructures::Town new_town = {.town_id=id,.name=name,
-                                    .coord=coord,.tax=tax};
+                                    .coord=coord,.tax=tax,
+                                    .master=nullptr, 
+                                    .vassals=std::unordered_set<Town*,IdHash_ptr>{},
+                                    .vassals_id=std::vector<TownID>{}
+    };
     bool is_added = (towns.emplace(new_town.town_id, new_town)).second;
     if (is_added) {
         towns_added_alpha.emplace(new_town.town_id);
@@ -240,34 +246,103 @@ TownID Datastructures::max_distance()
     return towns_dist_sorted.back();
 }
 
-bool Datastructures::add_vassalship(TownID /*vassalid*/, TownID /*masterid*/)
+bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_vassalship()");
+    try {
+        // Old attempt with uniquer pointers.
+        //
+        //auto vassal_ptr = std::make_unique<Town>(towns.at(vassalid));
+        //auto master_ptr = std::make_unique<Town>(towns.at(masterid));
+        //vassal_ptr->master = std::move(master_ptr);
+        //((towns.at(masterid)).vassals).emplace(std::move(vassal_ptr));
+        
+        auto *vassal_ptr = &towns.at(vassalid);
+        auto *master_ptr = &towns.at(masterid);
+        vassal_ptr->master = master_ptr;
+        master_ptr->vassals.emplace(vassal_ptr);
+
+        //master_ptr->vassals_id.emplace(vassal_ptr->town_id);
+        master_ptr->vassals_id.emplace_back(vassal_ptr->town_id);
+    } 
+    catch(std::out_of_range &e) {
+        return false;
+    }
+
+    return true;
 }
 
-std::vector<TownID> Datastructures::get_town_vassals(TownID /*id*/)
+std::vector<TownID> Datastructures::get_town_vassals(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_town_vassals()");
+    try {
+
+        return towns.at(id).vassals_id;
+        
+    } 
+    catch(std::out_of_range &e) {
+        return std::vector<TownID>{NO_NAME};
+    }
 }
 
 std::vector<TownID> Datastructures::taxer_path(TownID id)
 {
-    std::vector<TownID> foo;
-    
-    if town.at(i
-    
-    return foo;
+    try {
+
+        auto ptr = towns.at(id).master;
+        
+        std::vector<TownID> path = {towns.at(id).town_id};
+        path.reserve(known_depth+1);
+
+        size_t k = 0;
+        while ( ptr != nullptr ){
+            k++;
+            ptr = ptr->master;
+            path.push_back(ptr->town_id);
+        }
+
+        if (known_depth < k) known_depth = k;
+
+        return path;
+        
+    } 
+    catch(std::out_of_range &e) {
+        return std::vector<TownID>{NO_NAME};
+    }
 }
 
-bool Datastructures::remove_town(TownID /*id*/)
+bool Datastructures::remove_town(TownID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("remove_town()");
+    try {
+        Town *master = towns.at(id).master;
+        auto v_begin = towns.at(id).vassals.begin();
+        auto v_end = towns.at(id).vassals.end();
+        if (master != nullptr and v_begin != v_end )
+        {
+            auto itr = v_begin;
+            while (itr != v_end) 
+            {
+                (*itr)->master = master;
+            }
+
+            auto peer_vassals = 
+
+        } else if ( master == nullptr and v_begin != v_end ){
+            auto itr = v_begin;
+            while (itr != v_end) 
+            {
+                (*itr)->master = nullptr;
+            }
+        } else if ( master != nullptr and v_begin == v_end ){
+            
+        }
+
+
+        return true;
+        
+    } 
+    catch(std::out_of_range &e) {
+        return false;
+    }
+
 }
 
 std::vector<TownID> Datastructures::towns_nearest(Coord /*coord*/)
