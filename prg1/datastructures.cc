@@ -129,11 +129,13 @@ std::vector<TownID> Datastructures::find_towns(const Name &name)
 {
     std::vector<TownID> found = {};
 
-    //std::find_if(towns.begin(), towns.end(), 
-            //[&name](auto t){ t.name==name};);
+    //auto it = std::find_if(towns.begin(), towns.end(), 
+            //[&name](auto t){ t.name==name};
+            //);
+
     for ( auto &town:towns) {
         if (town.second.name == name){
-            found.push_back(name);
+            found.push_back(town.second.town_id);
         }
     }
     return found;
@@ -280,8 +282,13 @@ std::vector<TownID> Datastructures::taxer_path(TownID id)
         size_t k = 0;
         while ( master != nullptr ){
             k++;
-            master = master->master;
             path.push_back(master->town_id);
+
+            if ( master->master ) {
+                master = master->master;
+            } else {
+                master = nullptr;
+            }
         }
 
         if (known_depth < k) known_depth = k;
