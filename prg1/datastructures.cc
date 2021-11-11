@@ -74,13 +74,6 @@ bool Datastructures::add_town(TownID id, const Name &name,
     if (is_added) {
         towns_added_alpha.emplace(new_town.town_id);
         towns_added_dist.emplace(new_town.town_id);
-
-        // DEBUG FOUND TOWNS
-        std::cout << "Awaiting alpha: " << std::endl;
-        for ( auto f : towns_added_alpha ){
-            std::cout << f<< std::endl;
-        }
-        // END DEBUG
     }
     return is_added;
     
@@ -91,9 +84,6 @@ Name Datastructures::get_town_name(TownID id)
 {
     Name name;
     try {
-        // DEBUG
-        std::cout << "Attempting to find town: " << id << std::endl;
-        // END DEBUG
         name = towns.at(id).name;
     } 
     catch(std::out_of_range& e) {
@@ -139,18 +129,13 @@ std::vector<TownID> Datastructures::find_towns(const Name &name)
 {
     std::vector<TownID> found = {};
 
+    //std::find_if(towns.begin(), towns.end(), 
+            //[&name](auto t){ t.name==name};);
     for ( auto &town:towns) {
         if (town.second.name == name){
             found.push_back(name);
         }
     }
-
-    // DEBUG FOUND TOWNS
-    std::cout << "Found towns: " << std::endl;
-    for ( auto f : found){
-        std::cout << f<< std::endl;
-    }
-    // END DEBUG
     return found;
 }
 
@@ -287,16 +272,16 @@ std::vector<TownID> Datastructures::taxer_path(TownID id)
 {
     try {
 
-        auto ptr = towns.at(id).master;
+        auto master = towns.at(id).master;
         
         std::vector<TownID> path = {towns.at(id).town_id};
         path.reserve(known_depth+1);
 
         size_t k = 0;
-        while ( ptr != nullptr ){
+        while ( master != nullptr ){
             k++;
-            ptr = ptr->master;
-            path.push_back(ptr->town_id);
+            master = master->master;
+            path.push_back(master->town_id);
         }
 
         if (known_depth < k) known_depth = k;
@@ -312,30 +297,42 @@ std::vector<TownID> Datastructures::taxer_path(TownID id)
 bool Datastructures::remove_town(TownID id)
 {
     try {
-        Town *master = towns.at(id).master;
-        auto v_begin = towns.at(id).vassals.begin();
-        auto v_end = towns.at(id).vassals.end();
-        if (master != nullptr and v_begin != v_end )
+        Town *town = &towns.at(id);
+        Town *master = town->master;
+        auto *vassals = &town->vassals;
+
+        // Set master of vassals to master of town(id).
+        auto itr = vassals->begin();
+        while (itr != vassals->end()) 
         {
-            auto itr = v_begin;
-            while (itr != v_end) 
-            {
-                (*itr)->master = master;
-            }
-
-            auto peer_vassals = 
-
-        } else if ( master == nullptr and v_begin != v_end ){
-            auto itr = v_begin;
-            while (itr != v_end) 
-            {
-                (*itr)->master = nullptr;
-            }
-        } else if ( master != nullptr and v_begin == v_end ){
-            
+            (*itr)->master = master;
+            itr++;
         }
 
+        // If town(id) has master, set vassals of town to vassals
+        // of master.
+        if ( town->master != nullptr ) {
 
+            size_t vs_size = vassals->size();
+            size_t master_vs_size = master->vassals.size();
+
+            master->vassals.erase(&towns.at(id));
+            master->vassals.reserve(master_vs_size+vs_size);
+            master->vassals.merge(*vassals);
+
+            master->vassals_id.reserve(master_vs_size+vs_size);
+            auto it_begin = master->vassals_id.begin();
+            auto it_end = master->vassals_id.end();
+            master->vassals_id.insert(it_end, 
+                    town->vassals_id.begin(), town->vassals_id.end());
+
+            auto it = std::remove_if(it_begin, it_end, 
+                    [&](auto id_){return id_==id;});
+            master->vassals_id.erase(it);
+            //master->vassals_id.shrink_to_fit();
+        }
+        town->master = nullptr;
+        towns.erase(id);
         return true;
         
     } 

@@ -1,0 +1,10 @@
+read "test-data.txt"
+all_towns
+towns_alphabetically
+
+//remove_town Kuo
+//all_towns
+//add_town Kuo Kuopio (6,3) 300
+
+//add_vassalship Kuo Hki
+//remove_town Hki
