@@ -156,7 +156,8 @@ public:
 
     // Estimate of performance: O(n(log(n)) only when new towns have been added
     // before previous call.
-    // Constant when array is already sorted, array is always sorted after an
+    // Constant when array is already sorted, array is always sorted after 
+    // call to towns_distance_increasing and before call to add_town.
     // element not currently in sorted array exists.
     // Short rationale for estimate: TownID's are kept in an array sorted 
     // using std::sort() and sorted by distance.
@@ -164,40 +165,46 @@ public:
 
     // Estimate of performance: O(n(log(n)) only when new towns have been added
     // before previous call.
-    // Constant when array is already sorted, array is always sorted after an
+    // Constant when array is already sorted, array is always sorted after 
+    // call to towns_distance_increasing and before call to add_town.
     // Short rationale for estimate: TownID's are kept in an array sorted 
-    // using std::sort() and sorted by distance.
+    // using std::sort() by distance.
     // Opted to sort the array instead of std::nth_element [ O(nlog(n)) vs .O(n)]
     // since accessing after the sorting is always constant time and sorted
     // array is also used by towns_distance_increasing.
     TownID min_distance();
 
-    // Estimate of performance: O(n(log(n)) only when new towns have been added
-    // before previous call.
-    // Constant when array is already sorted, array is always sorted after an
-    // Short rationale for estimate: TownID's are kept in an array sorted 
-    // using std::sort() and sorted by distance.
-    // Opted to sort the array instead of std::nth_element [ O(nlog(n)) vs .O(n)]
-    // since accessing after the sorting is always constant time and sorted
-    // array is also used by towns_distance_increasing.
+    // Same as above.
     TownID max_distance();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Linear in number of towns if town does not
+    // exist.
+    // Average constant time if town exists.
+    // Short rationale for estimate: cppreference describes average constant
+    // time access to unsorted_map, and linear in size of map if element is not
+    // found using .at() operator.
     bool add_vassalship(TownID vassalid, TownID masterid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Constant time at the expense of higher memory.
+    // Short rationale for estimate: Keeping a copy of TownIDs of direct
+    // vassals for each town in a vector, which is returned in the function.
     std::vector<TownID> get_town_vassals(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: 
+    // Worst case: Linear in number of towns if town doesn't exist. 
+    // Best case: Linear in depth of master-vassal relations.
+    // Short rationale for estimate: Masters are pushed back to a vector while
+    // they exist.
     std::vector<TownID> taxer_path(TownID id);
 
     // Non-compulsory phase 1 operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Linear in size of vassals of town to be
+    // removed. Also linear in size of number vassals of master of town
+    // to be removed.
+    // Short rationale for estimate: Merging to unordered_set is worst case 
+    // linear in size of containers to be merged.
+    // Inserting to a vector (vector<TownID>) is linear in elements inserted.
     bool remove_town(TownID id);
 
     // Estimate of performance:
@@ -215,20 +222,11 @@ public:
 private:
     // Add stuff needed for your class implementation here
 
-
     Distance dist(TownID &id);
     void sort_by_distance();
 
+    // Forward declare to be used in hash computation.
     struct Town;
-
-    class IdHash {
-        public:
-            size_t operator()(const TownID &id ) const{
-                std::hash<std::string> hasher;
-                return hasher(id);
-            }
-    };
-
     class IdHash_ptr {
         public:
             size_t operator()(const Town *t) const{
@@ -247,36 +245,26 @@ private:
         Coord coord;
         int tax;
 
-        //Town master;
-        //std::unordered_set<Town, IdHash> vassals;
-
         Town *master;
-        std::unordered_set<Town*, IdHash_ptr> vassals;
-        //std::unordered_set<TownID, IdHash> vassals_id;
-        std::vector<TownID> vassals_id;
 
-        //std::unique_ptr<Town> master;
-        //std::unordered_set<std::unique_ptr<Town>, IdHash> vassals;
+        std::unordered_set<Town*, IdHash_ptr> vassals;
+        std::vector<TownID> vassals_id;
     };
 
-
-    // f(.) some function of the hashesh of both?
-    //std::unordered_set<std::pair<Town,Town>, f(CoordHash)> vassals;
-    // Store information of master-vassall relationship.
-    // Hash with the vassal hash, i.e. information retrieval
-    // retrieves master of key.
     std::unordered_map<TownID, Town> towns;
 
-    //std::set<TownID, AlphaComp> towns_alpha_sorted;
-    //std::set<TownID> towns_added;
+    // Container of towns ids sorted by town names.
     std::vector<TownID> towns_alpha_sorted;
+    // Temporary container for towns not yet sorted.
     std::unordered_set<TownID> towns_added_alpha;
 
+    // Container of towns ids sorted by town distance from origin.
     std::vector<TownID> towns_dist_sorted;
+    // Temporary container for towns not yet sorted.
     std::unordered_set<TownID> towns_added_dist;
 
     // A hint for the longest path of master-vassal relationships
-    // used for reserving space for relevant vectors.
+    // used for reserving memory for relevant vectors.
     size_t known_depth;
 
 };
