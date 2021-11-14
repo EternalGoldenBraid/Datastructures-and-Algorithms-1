@@ -36,7 +36,6 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Write any initialization you need here
-    //std::unordered_map<TownID, Town> towns = {};
     towns = {};
     towns_added_alpha = {};
     towns_alpha_sorted = {};
@@ -49,6 +48,15 @@ Datastructures::Datastructures()
 
 Datastructures::~Datastructures() {
     // Write any cleanup you need here
+      
+    for ( auto p: towns ) {
+        Town t = p.second;
+        delete(t.master);
+        for ( Town *v : t.vassals ) {
+            delete(v);
+        }
+    }
+     
 }
 
 unsigned int Datastructures::town_count()
@@ -64,16 +72,50 @@ void Datastructures::clear_all()
 bool Datastructures::add_town(TownID id, const Name &name,
    				 Coord coord, int tax)
 {
-    Datastructures::Town new_town = {.town_id=id,.name=name,
-                                    .coord=coord,.tax=tax,
-                                    .master=nullptr, 
-                                    .vassals=std::unordered_set<Town*,IdHash_ptr>{},
-                                    .vassals_id=std::vector<TownID>{}
+    Datastructures::Town new_town = {
+            .town_id=id,.name=name,
+            .coord=coord,.tax=tax,
+            //.master=nullptr, 
+            .master=new Town(), 
+            .vassals=std::unordered_set<Town*,IdHash_ptr>{},
+            .vassals_id=std::vector<TownID>{}
     };
-    bool is_added = (towns.emplace(new_town.town_id, new_town)).second;
+
+
+        // DEBUG
+        std::cout << "NEW TOWN: " << id << std::endl;
+        try {
+            towns.at(id);
+            std::cout << "Already exist!" << std::endl;
+
+        } catch(std::out_of_range &e) {
+            std::cout << "Does not already exist in " 
+                    << towns.size() << " number of towns."<< std::endl;
+            std::cout << "Towns:  ";
+            for (auto t : towns) {
+                std::cout << t.first<< ", ";
+            }
+                std::cout <<std::endl;
+        }
+        // END DEBUG
+
+    //bool is_added = (towns.try_emplace(new_town.town_id, new_town)).second;
+    bool is_added = (towns.insert({new_town.town_id, new_town})).second;
     if (is_added) {
-        towns_added_alpha.emplace(new_town.town_id);
-        towns_added_dist.emplace(new_town.town_id);
+        //// DEBUG
+        std::cout << "ADDING TO added: " << id << std::endl;
+        std::cout << "added empty?: " << towns_added_alpha.empty() << std::endl;
+        std::cout << "Added_alpha: ";
+        for ( auto t : towns_added_alpha ) {
+            std::cout << t << ", ";
+        }
+        std::cout << std::endl;
+        std::cout << "is_added: " << is_added << std::endl;
+        std::cout << "" << std::endl;
+
+        // END DEBUG
+        towns_added_alpha.emplace_back(new_town.town_id);
+        //towns_added_dist.emplace_back(new_town.town_id);
     }
 
     return is_added;
@@ -156,26 +198,14 @@ std::vector<TownID> Datastructures::towns_alphabetically()
 
     if (!towns_added_alpha.empty()) {
 
-        size_t alpha_sz = towns_alpha_sorted.size();
-        size_t added_sz = towns_added_alpha.size();
-        towns_alpha_sorted.reserve(alpha_sz+added_sz);
-
-
-
-        auto itr = towns_added_alpha.begin();
-        while (itr != towns_added_alpha.end()) {
-            towns_alpha_sorted.emplace_back(*itr);
-            itr++;
-        }
         auto comp = [&](TownID a, TownID b){ 
-                std::cout << a <<", " << b  << std::endl;
+                //std::cout << a <<", " << b  << std::endl;
                 return towns.at(a).name < towns.at(b).name;
         };
-        //std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
-                //comp);
+
         try{
-        std::sort(towns_alpha_sorted.begin(),towns_alpha_sorted.end(),
-                comp);
+            std::sort(towns_added_alpha.begin(),towns_added_alpha.end(),
+                    comp);
         }
         catch(std::out_of_range &e) {
 
@@ -183,6 +213,17 @@ std::vector<TownID> Datastructures::towns_alphabetically()
             std::cout << "RESERVE FUCK" << std::endl;
             // END DEBUG
         }
+        
+        // Merge the two sorted arrays.
+        size_t alpha_sz = towns_alpha_sorted.size();
+        size_t added_sz = towns_added_alpha.size();
+        towns_alpha_sorted.reserve(alpha_sz+added_sz);
+
+        auto middle = towns_alpha_sorted.end();
+        towns_alpha_sorted.insert(towns_alpha_sorted.end(), 
+                towns_added_alpha.begin(), towns_added_alpha.end());
+        std::inplace_merge(towns_alpha_sorted.begin(), middle, 
+                towns_alpha_sorted.end());
         
         towns_added_alpha.clear();
     }
@@ -201,16 +242,6 @@ Distance Datastructures::dist(TownID &a){
 
 void Datastructures::sort_by_distance() {
 
-    size_t dist_sz = towns_alpha_sorted.size();
-    size_t added_sz = towns_added_dist.size();
-
-    towns_dist_sorted.reserve(dist_sz+added_sz);
-    
-    auto itr = towns_added_dist.begin();
-    while (itr != towns_added_dist.end()) {
-        towns_dist_sorted.emplace_back(*itr);
-        itr++;
-    }
     
     auto comp = [&](TownID a, TownID b){ 
             auto dist_a = dist(a);
@@ -218,20 +249,25 @@ void Datastructures::sort_by_distance() {
             return dist_a < dist_b;
     };
     
-    
     // DEBUG
     try{
-    std::sort(towns_dist_sorted.begin(),towns_dist_sorted.end(),
+    std::sort(towns_added_dist.begin(),towns_added_dist.end(),
             comp);
     }
     catch(std::out_of_range &e) {
-
             std::cout << "RESERVE FUCK" << std::endl;
         }
     // END DEBUG
       
-    //std::sort(towns_dist_sorted.begin(),towns_dist_sorted.end(),
-            //comp);
+    size_t dist_sz = towns_dist_sorted.size();
+    size_t added_sz = towns_added_dist.size();
+    towns_dist_sorted.reserve(dist_sz+added_sz);
+
+    auto middle = towns_dist_sorted.end();
+    towns_dist_sorted.insert(towns_dist_sorted.end(), 
+            towns_added_dist.begin(), towns_added_dist.end());
+    std::inplace_merge(towns_dist_sorted.begin(), middle, 
+            towns_dist_sorted.end());
     
     towns_added_dist.clear();
 
@@ -262,27 +298,30 @@ TownID Datastructures::max_distance()
 
 bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
 {
+    // DEBUG
+    //std::cout << "ADDING VASSALS" << std::endl;
+    // END DEBUG
     try {
-        // Old attempt with uniquer pointers had issues with sharing ptrs..
-        // Raw pointers shouldn't be an issue though since I'm not reserving
-        // memory for anything else besides the pointer itself if I've
-        // understood thing correctly.
-        //
-        //auto vassal_ptr = std::make_unique<Town>(towns.at(vassalid));
-        //auto master_ptr = std::make_unique<Town>(towns.at(masterid));
-        //vassal_ptr->master = std::move(master_ptr);
-        //((towns.at(masterid)).vassals).emplace(std::move(vassal_ptr));
-        
-        auto *vassal_ptr = &towns.at(vassalid);
-        if ( vassal_ptr->master != nullptr ) return false;
-        auto *master_ptr = &towns.at(masterid);
+        //auto vassal_ptr = new Town(towns.at(vassalid));
+          
+        auto vassal_ptr = &towns.at(vassalid);
+        if ( vassal_ptr->master->town_id != TownID("") ) {
+            //delete(vassal_ptr);
+            return false;
+        }
 
+        //auto master_ptr = new Town(towns.at(masterid));
+          
+        auto master_ptr = &towns.at(masterid);
         vassal_ptr->master = master_ptr;
         master_ptr->vassals.emplace(vassal_ptr);
 
         master_ptr->vassals_id.emplace_back(vassal_ptr->town_id);
     } 
     catch(std::out_of_range &e) {
+        // DEBUG
+        std::cout << "ADDING VASSALS FAILED" << std::endl;
+        // END DEBUG
         return false;
     }
 
@@ -334,6 +373,7 @@ std::vector<TownID> Datastructures::taxer_path(TownID id)
 
 bool Datastructures::remove_town(TownID id)
 {
+    std::cout << "REMOVING TOWNS!!!!!!" << std::endl;
     try {
         Town *town = &towns.at(id);
         Town *master = town->master;

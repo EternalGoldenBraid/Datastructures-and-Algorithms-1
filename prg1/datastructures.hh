@@ -238,6 +238,7 @@ private:
             }
     };
 
+
     struct Town
     {
       	TownID town_id;
@@ -251,17 +252,24 @@ private:
         std::vector<TownID> vassals_id;
     };
 
-    std::unordered_map<TownID, Town> towns;
+    class IdHash {
+        public:
+            size_t operator()(const TownID id) const{
+                std::hash<std::string> hasher;
+                return hasher(id);
+            }
+    };
+    std::unordered_map<TownID, Town, IdHash> towns;
 
     // Container of towns ids sorted by town names.
     std::vector<TownID> towns_alpha_sorted;
     // Temporary container for towns not yet sorted.
-    std::unordered_set<TownID> towns_added_alpha;
+    std::vector<TownID> towns_added_alpha;
 
     // Container of towns ids sorted by town distance from origin.
     std::vector<TownID> towns_dist_sorted;
     // Temporary container for towns not yet sorted.
-    std::unordered_set<TownID> towns_added_dist;
+    std::vector<TownID> towns_added_dist;
 
     // A hint for the longest path of master-vassal relationships
     // used for reserving memory for relevant vectors.
