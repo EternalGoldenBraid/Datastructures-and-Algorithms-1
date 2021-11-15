@@ -84,11 +84,9 @@ bool Datastructures::add_town(TownID id, const Name &name,
 
         // DEBUG
         std::cout << "NEW TOWN: " << id << std::endl;
-        try {
-            towns.at(id);
+        if ( towns.find(id) == towns.end() ) {
             std::cout << "Already exist!" << std::endl;
-
-        } catch(std::out_of_range &e) {
+        } else {
             std::cout << "Does not already exist in " 
                     << towns.size() << " number of towns."<< std::endl;
             std::cout << "Towns:  ";
@@ -97,23 +95,25 @@ bool Datastructures::add_town(TownID id, const Name &name,
             }
                 std::cout <<std::endl;
         }
-        // END DEBUG
+         // END DEBUG
 
     //bool is_added = (towns.try_emplace(new_town.town_id, new_town)).second;
     bool is_added = (towns.insert({new_town.town_id, new_town})).second;
     if (is_added) {
+
         //// DEBUG
-        std::cout << "ADDING TO added: " << id << std::endl;
-        std::cout << "added empty?: " << towns_added_alpha.empty() << std::endl;
-        std::cout << "Added_alpha: ";
+        std::cout << "ADDING TO sort buffer: " << id << std::endl;
+        std::cout << "buffer empty?: " << towns_added_alpha.empty() << std::endl;
+        std::cout << "buffer contents: ";
         for ( auto t : towns_added_alpha ) {
             std::cout << t << ", ";
         }
         std::cout << std::endl;
-        std::cout << "is_added: " << is_added << std::endl;
+        std::cout << "is_added to towns: " << is_added << std::endl;
         std::cout << "" << std::endl;
 
         // END DEBUG
+          
         towns_added_alpha.emplace_back(new_town.town_id);
         //towns_added_dist.emplace_back(new_town.town_id);
     }
@@ -299,7 +299,13 @@ TownID Datastructures::max_distance()
 bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
 {
     // DEBUG
-    //std::cout << "ADDING VASSALS" << std::endl;
+    std::cout << "ADDING VASSALS" << std::endl;
+    std::cout << "Contents of town: " << std::endl;
+    for ( auto t: towns ) {
+        std::cout << t.first;
+    }
+        std::cout << std::endl;
+    
     // END DEBUG
     try {
         //auto vassal_ptr = new Town(towns.at(vassalid));
@@ -321,10 +327,14 @@ bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
     catch(std::out_of_range &e) {
         // DEBUG
         std::cout << "ADDING VASSALS FAILED" << std::endl;
+        std::cout << "Contents of towns: " << std::endl;
+        for ( auto t: towns ) {
+            std::cout << t.first;
+        }
+            std::cout << std::endl;
         // END DEBUG
         return false;
     }
-
     return true;
 }
 
