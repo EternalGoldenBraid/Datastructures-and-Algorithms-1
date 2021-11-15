@@ -44,18 +44,21 @@ Datastructures::Datastructures()
     towns_dist_sorted = {};
 
     size_t known_depth = 0;
+
+    //DEBUG_ = true;
+    DEBUG_ = false;
 }
 
 Datastructures::~Datastructures() {
     // Write any cleanup you need here
       
-    for ( auto p: towns ) {
-        Town t = p.second;
-        delete(t.master);
-        for ( Town *v : t.vassals ) {
-            delete(v);
-        }
-    }
+    //for ( auto p: towns ) {
+    //    Town t = p.second;
+    //    delete(t.master);
+    //    //for ( Town *v : t.vassals ) {
+    //    //    delete(v);
+    //    //}
+    //}
      
 }
 
@@ -67,6 +70,10 @@ unsigned int Datastructures::town_count()
 void Datastructures::clear_all()
 {
     towns.clear();
+    towns_alpha_sorted.clear();
+    towns_added_alpha.clear();
+    towns_dist_sorted.clear();
+    towns_added_dist.clear();
 }
 
 bool Datastructures::add_town(TownID id, const Name &name,
@@ -83,17 +90,20 @@ bool Datastructures::add_town(TownID id, const Name &name,
 
 
         // DEBUG
-        std::cout << "NEW TOWN: " << id << std::endl;
-        if ( towns.find(id) == towns.end() ) {
-            std::cout << "Already exist!" << std::endl;
-        } else {
-            std::cout << "Does not already exist in " 
-                    << towns.size() << " number of towns."<< std::endl;
+        if ( DEBUG_ ) {
+
+            std::cout << "NEW TOWN: " << id << std::endl;
             std::cout << "Towns:  ";
             for (auto t : towns) {
                 std::cout << t.first<< ", ";
             }
                 std::cout <<std::endl;
+
+            if ( towns.find(id) == towns.end() ) {
+                std::cout << "Does not already exist" << std::endl;
+            } else {
+                std::cout << "Already exist" << std::endl;
+            }
         }
          // END DEBUG
 
@@ -102,20 +112,27 @@ bool Datastructures::add_town(TownID id, const Name &name,
     if (is_added) {
 
         //// DEBUG
-        std::cout << "ADDING TO sort buffer: " << id << std::endl;
-        std::cout << "buffer empty?: " << towns_added_alpha.empty() << std::endl;
-        std::cout << "buffer contents: ";
-        for ( auto t : towns_added_alpha ) {
-            std::cout << t << ", ";
+
+        if ( DEBUG_ ) {
+            if ( towns_added_alpha.empty() ) {
+                std::cout << "buffer empty!" << std::endl;
+            } else {
+                std::cout << "buffer contents: ";
+                for ( auto t : towns_added_alpha ) {
+                    std::cout << t << ", ";
+                }
+                std::cout << std::endl;
+            }
+
+            std::cout << "ADDING TO sort buffer: " << id << std::endl;
+            std::cout << "" << std::endl;
+
         }
-        std::cout << std::endl;
-        std::cout << "is_added to towns: " << is_added << std::endl;
-        std::cout << "" << std::endl;
 
         // END DEBUG
           
         towns_added_alpha.emplace_back(new_town.town_id);
-        //towns_added_dist.emplace_back(new_town.town_id);
+        towns_added_dist.emplace_back(new_town.town_id);
     }
 
     return is_added;
@@ -125,57 +142,34 @@ bool Datastructures::add_town(TownID id, const Name &name,
 
 Name Datastructures::get_town_name(TownID id)
 {
-    Name name;
-    try {
-        name = towns.at(id).name;
-    } 
-    catch(std::out_of_range& e) {
-        return NO_NAME;
-    }
-    
-    return name;
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return NO_NAME;
+    return itr->second.name;
 }
 
 Coord Datastructures::get_town_coordinates(TownID id)
 {
-    Coord coord;
-    try {
-        coord = towns.at(id).coord;
-    } 
-    catch(std::out_of_range& e) {
-        return NO_COORD;
-    }
-    return coord;
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return NO_COORD;
+    return itr->second.coord;
 }
 
 int Datastructures::get_town_tax(TownID id)
 {
-    int tax;
-    try {
-        tax = towns.at(id).tax;
-    } 
-    catch(std::out_of_range& e) {
-        return NO_VALUE;
-    }
-    return tax;
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return NO_VALUE;
+    return itr->second.tax;
+    //return (*itr).second.tax;
 }
 
 std::vector<TownID> Datastructures::all_towns()
 {
-    std::vector<TownID> ids;
-    ids.reserve(towns.size());
-    for (const auto &[id, _]:towns) ids.push_back(id);
-    return ids;
+    return towns_alpha_sorted;
 }
 
 std::vector<TownID> Datastructures::find_towns(const Name &name)
 {
     std::vector<TownID> found = {};
-
-    //auto it = std::find_if(towns.begin(), towns.end(), 
-            //[&name](auto t){ t.name==name};
-            //);
-
     for ( auto &town:towns) {
         if (town.second.name == name){
             found.push_back(town.second.town_id);
@@ -186,10 +180,9 @@ std::vector<TownID> Datastructures::find_towns(const Name &name)
 
 bool Datastructures::change_town_name(TownID id, const Name &newname)
 {
-    try {
-        (&towns.at(id))->name = newname;
-    }
-    catch(std::out_of_range &e) {return false;}
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return false;
+    itr->second.name = newname;
     return true;
 }
 
@@ -203,16 +196,18 @@ std::vector<TownID> Datastructures::towns_alphabetically()
                 return towns.at(a).name < towns.at(b).name;
         };
 
-        try{
-            std::sort(towns_added_alpha.begin(),towns_added_alpha.end(),
-                    comp);
+        // DEBUG
+        if ( DEBUG_ ) {
+            try{
+                std::sort(towns_added_alpha.begin(),towns_added_alpha.end(),
+                        comp);
+            }
+            catch(std::out_of_range &e) {
+                std::cout << "RESERVE FUCK" << std::endl;
+            }
         }
-        catch(std::out_of_range &e) {
-
-            // DEBUG
-            std::cout << "RESERVE FUCK" << std::endl;
-            // END DEBUG
-        }
+        std::sort(towns_added_alpha.begin(),towns_added_alpha.end(),
+                comp);
         
         // Merge the two sorted arrays.
         size_t alpha_sz = towns_alpha_sorted.size();
@@ -249,15 +244,21 @@ void Datastructures::sort_by_distance() {
             return dist_a < dist_b;
     };
     
-    // DEBUG
-    try{
+    if ( DEBUG_ ) {
+
+        // DEBUG
+        try{
+        std::sort(towns_added_dist.begin(),towns_added_dist.end(),
+                comp);
+        }
+        catch(std::out_of_range &e) {
+                std::cout << "RESERVE FUCK" << std::endl;
+            }
+        // END DEBUG
+    }
+
     std::sort(towns_added_dist.begin(),towns_added_dist.end(),
             comp);
-    }
-    catch(std::out_of_range &e) {
-            std::cout << "RESERVE FUCK" << std::endl;
-        }
-    // END DEBUG
       
     size_t dist_sz = towns_dist_sorted.size();
     size_t added_sz = towns_added_dist.size();
@@ -282,7 +283,9 @@ std::vector<TownID> Datastructures::towns_distance_increasing()
 
 TownID Datastructures::min_distance()
 {
-    if (!towns_added_dist.empty()) {
+    if (towns_dist_sorted.empty()) {
+        sort_by_distance();
+    }else if (!towns_added_dist.empty()) {
         sort_by_distance();
     }
     return towns_dist_sorted.front();
@@ -290,7 +293,9 @@ TownID Datastructures::min_distance()
 
 TownID Datastructures::max_distance()
 {
-    if (!towns_added_dist.empty()) {
+    if (towns_dist_sorted.empty()) {
+        sort_by_distance();
+    }else if (!towns_added_dist.empty()) {
         sort_by_distance();
     }
     return towns_dist_sorted.back();
@@ -299,39 +304,49 @@ TownID Datastructures::max_distance()
 bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
 {
     // DEBUG
+    if ( DEBUG_ ) {
+
     std::cout << "ADDING VASSALS" << std::endl;
-    std::cout << "Contents of town: " << std::endl;
+    std::cout << "Contents of town: ";
     for ( auto t: towns ) {
-        std::cout << t.first;
+        std::cout << t.first << ", ";
     }
         std::cout << std::endl;
+        std::cout << "" << std::endl;
     
+    }
     // END DEBUG
     try {
         //auto vassal_ptr = new Town(towns.at(vassalid));
           
-        auto vassal_ptr = &towns.at(vassalid);
-        if ( vassal_ptr->master->town_id != TownID("") ) {
+        //auto vassal_ptr = &towns.at(vassalid);
+        auto vassal_ptr = towns.find(vassalid);
+        if ( vassal_ptr == towns.end() or 
+                vassal_ptr->second.master->town_id != TownID("") ) {
             //delete(vassal_ptr);
             return false;
         }
 
         //auto master_ptr = new Town(towns.at(masterid));
           
-        auto master_ptr = &towns.at(masterid);
-        vassal_ptr->master = master_ptr;
-        master_ptr->vassals.emplace(vassal_ptr);
+        //auto master_ptr = &towns.at(masterid);
+        auto master_ptr = towns.find(masterid);
+        vassal_ptr->second.master = &(master_ptr->second);
+        master_ptr->second.vassals.emplace(&(vassal_ptr->second));
 
-        master_ptr->vassals_id.emplace_back(vassal_ptr->town_id);
+        master_ptr->second.vassals_id.emplace_back(
+                vassal_ptr->second.town_id);
     } 
     catch(std::out_of_range &e) {
         // DEBUG
-        std::cout << "ADDING VASSALS FAILED" << std::endl;
-        std::cout << "Contents of towns: " << std::endl;
-        for ( auto t: towns ) {
-            std::cout << t.first;
+        if ( DEBUG_ ) {
+            std::cout << "ADDING VASSALS FAILED" << std::endl;
+            std::cout << "Contents of towns: " << std::endl;
+            for ( auto t: towns ) {
+                std::cout << t.first;
+            }
+                std::cout << std::endl;
         }
-            std::cout << std::endl;
         // END DEBUG
         return false;
     }
@@ -340,52 +355,50 @@ bool Datastructures::add_vassalship(TownID vassalid, TownID masterid)
 
 std::vector<TownID> Datastructures::get_town_vassals(TownID id)
 {
-    try {
-
-        return towns.at(id).vassals_id;
-        
-    } 
-    catch(std::out_of_range &e) {
-        return std::vector<TownID>{NO_NAME};
-    }
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return std::vector<TownID>{NO_NAME};
+    return itr->second.vassals_id;
 }
 
 std::vector<TownID> Datastructures::taxer_path(TownID id)
 {
-    try {
+    auto itr = towns.find(id);
+    if ( itr == towns.end() ) return std::vector<TownID>{NO_NAME};
 
-        auto master = towns.at(id).master;
-        
-        std::vector<TownID> path = {towns.at(id).town_id};
-        path.reserve(known_depth+1);
+    auto master = itr->second.master;
+    
+    std::vector<TownID> path = {towns.at(id).town_id};
 
-        size_t k = 0;
-        while ( master != nullptr ){
-            k++;
-            path.push_back(master->town_id);
+    // Use previous estimates of longest path length to 
+    // reserve memory for depth estimate.
+    path.reserve(known_depth+1);
 
-            if ( master->master ) {
-                master = master->master;
-            } else {
-                master = nullptr;
-            }
+    size_t k = 0;
+    while ( master != nullptr ){
+        k++;
+        path.push_back(master->town_id);
+
+        if ( master->master ) {
+            master = master->master;
+        } else {
+            master = nullptr;
         }
-
-        if (known_depth < k) known_depth = k;
-
-        return path;
-        
-    } 
-    catch(std::out_of_range &e) {
-        return std::vector<TownID>{NO_NAME};
     }
+
+    if (known_depth < k) known_depth = k;
+
+    return path;
 }
 
 bool Datastructures::remove_town(TownID id)
 {
     std::cout << "REMOVING TOWNS!!!!!!" << std::endl;
     try {
-        Town *town = &towns.at(id);
+
+    auto it = towns.find(id);
+    if ( it == towns.end() ) return false;
+
+        Town *town = &it->second;
         Town *master = town->master;
         auto *vassals = &town->vassals;
 
@@ -421,10 +434,16 @@ bool Datastructures::remove_town(TownID id)
         }
 
 
-        auto itr_alpha = std::remove_if(towns_alpha_sorted.begin(), towns_alpha_sorted.end(), 
+        auto itr_alpha = std::remove_if(
+                towns_alpha_sorted.begin(), towns_alpha_sorted.end(), 
                 [&](auto id_){return id_==id;});
         towns_alpha_sorted.erase(itr_alpha);
-        town->master = nullptr;
+
+        auto itr_dist = std::remove_if(
+                towns_dist_sorted.begin(), towns_dist_sorted.end(), 
+                [&](auto id_){return id_==id;});
+        towns_dist_sorted.erase(itr_dist);
+
         towns.erase(id);
         return true;
         

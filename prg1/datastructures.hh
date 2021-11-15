@@ -133,9 +133,8 @@ public:
     // std::unsorted_map
     int get_town_tax(TownID id);
 
-    // Estimate of performance: Linear in number of towns.
-    // Short rationale for estimate: Simple for loop through
-    // unsorted_map.
+    // Estimate of performance: Constant
+    // Short rationale for estimate: Returned stored array of ID's.
     std::vector<TownID> all_towns();
 
     // Estimate of performance: Average linear time complexity.
@@ -143,24 +142,28 @@ public:
     std::vector<TownID> find_towns(Name const& name);
 
     // Estimate of performance:  Average constant time complexity
+    // Linear in number of towns if town doesn't exist.
     // for search of the town. Acessing struct Town.name is constant time.
     // Short rationale for estimate: So promised by cppref. for 
     // std::unsorted_map
     bool change_town_name(TownID id, Name const& newname);
 
-    // Estimate of performance: O(n(log(n)) only when new towns have been added
-    // before previous call.
-    // Short rationale for estimate: TownID's are kept in an array sorted 
-    // using std::sort() and sorted by town.name.
+    // Estimate of performance: 
+    //      Worst case nlog(n) in size of added towns IF the application is used 
+    // such that many towns are added in between calls for
+    // towns_alphabetically.
+    // When the amount of towns added between calls is small nlog(n) is small
+    // and the functions performs better.
+    // Short rationale for estimate: 
+    //      A vector of already sorted arrays and a buffer is maintained.
+    //  The buffer is sorted on function call towns_alphabetically, and
+    //  then merged with the already sorted vector of ID's. Buffer is cleared.
+    //  As buffer size (number of towns added) converges to small numbers
+    //  sorting becomes cheaper and cheaper.
     std::vector<TownID> towns_alphabetically();
 
-    // Estimate of performance: O(n(log(n)) only when new towns have been added
-    // before previous call.
-    // Constant when array is already sorted, array is always sorted after 
-    // call to towns_distance_increasing and before call to add_town.
-    // element not currently in sorted array exists.
-    // Short rationale for estimate: TownID's are kept in an array sorted 
-    // using std::sort() and sorted by distance.
+    // Estimate of performance: Same as above.
+    // Short rationale for estimate: Same as above.
     std::vector<TownID> towns_distance_increasing();
 
     // Estimate of performance: O(n(log(n)) only when new towns have been added
@@ -202,9 +205,12 @@ public:
     // Estimate of performance: Linear in size of vassals of town to be
     // removed. Also linear in size of number vassals of master of town
     // to be removed.
-    // Short rationale for estimate: Merging to unordered_set is worst case 
-    // linear in size of containers to be merged.
-    // Inserting to a vector (vector<TownID>) is linear in elements inserted.
+    // Short rationale for estimate: 
+    // Merging to unordered_set is worst case linear in size of 
+    // containers to be merged.
+    // Inserting to vector (vector<TownID>) is linear in elements inserted.
+    // Removing from the two buffer containers of distance and alpha
+    // sorted arrays is linear in their size.
     bool remove_town(TownID id);
 
     // Estimate of performance:
@@ -274,6 +280,8 @@ private:
     // A hint for the longest path of master-vassal relationships
     // used for reserving memory for relevant vectors.
     size_t known_depth;
+    
+    bool DEBUG_;
 
 };
 
