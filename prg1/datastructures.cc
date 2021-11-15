@@ -52,13 +52,13 @@ Datastructures::Datastructures()
 Datastructures::~Datastructures() {
     // Write any cleanup you need here
       
-    //for ( auto p: towns ) {
-    //    Town t = p.second;
-    //    delete(t.master);
-    //    //for ( Town *v : t.vassals ) {
-    //    //    delete(v);
-    //    //}
-    //}
+    for ( auto p: towns ) {
+        Town t = p.second;
+        delete(t.master);
+        //for ( Town *v : t.vassals ) {
+        //    delete(v);
+        //}
+    }
      
 }
 
