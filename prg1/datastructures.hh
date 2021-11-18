@@ -228,7 +228,8 @@ public:
 private:
     // Add stuff needed for your class implementation here
 
-    Distance dist(TownID &id);
+    Distance dist(TownID &id, Coord &coord);
+    Coord default_coord = { 0, 0 };
     void sort_by_distance();
 
     // Forward declare to be used in hash computation.

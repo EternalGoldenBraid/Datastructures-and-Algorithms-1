@@ -226,7 +226,8 @@ std::vector<TownID> Datastructures::towns_alphabetically()
     return towns_alpha_sorted;
 }
 
-Distance Datastructures::dist(TownID &a){
+//Distance Datastructures::dist(TownID &a,static const Coord &coord){
+Distance Datastructures::dist(TownID &a,Coord &coord){
 
     using namespace std;
     auto coord_a = towns.at(a).coord;
@@ -239,8 +240,8 @@ void Datastructures::sort_by_distance() {
 
     
     auto comp = [&](TownID a, TownID b){ 
-            auto dist_a = dist(a);
-            auto dist_b = dist(b);
+            auto dist_a = dist(a, default_coord);
+            auto dist_b = dist(b, default_coord);
             return dist_a < dist_b;
     };
     
@@ -454,11 +455,26 @@ bool Datastructures::remove_town(TownID id)
 
 }
 
-std::vector<TownID> Datastructures::towns_nearest(Coord /*coord*/)
+std::vector<TownID> Datastructures::towns_nearest(Coord coord)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("towns_nearest()");
+    auto comp = [&](TownID a, TownID b){ 
+            auto dist_a = dist(a, coord);
+            auto dist_b = dist(b, coord);
+            return dist_a < dist_b;
+    };
+
+
+    // Sort unsorted items if there are any before copying.
+    if ( !towns_added_alpha.empty() ) {
+        sort_by_distance();
+    }
+
+    std::vector<TownID> temp;
+    temp.reserve(towns_alpha_sorted.size());
+    std::copy(towns_alpha_sorted.begin(), towns_alpha_sorted.end(), temp.begin());
+    std::sort(temp.begin(),temp.end(),comp);
+
+    return temp;
 }
 
 std::vector<TownID> Datastructures::longest_vassal_path(TownID /*id*/)
