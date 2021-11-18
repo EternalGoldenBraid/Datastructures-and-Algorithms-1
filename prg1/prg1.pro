@@ -5,13 +5,13 @@
 #-------------------------------------------------
 
 # Uncomment the line below to enable debug STL (with more checks on iterator invalidation etc.)
-# NOTE 1: Enabling debug STL mode will make the performance WORSE. So don't enable it when running performance tests!
+# NOTE 1: Enabling debug STL mode will make the performance WORSE. So dont enable it when running performance tests!
 # NOTE 2: If you uncomment or recomment the line, remember to recompile EVERYTHING by selecting
-# "Rebuild all" from the Build menu
+# Rebuild all from the Build menu
 #QMAKE_CXXFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
 
 # Uncomment the line below to use Linux kernel performance events for the perftest command
-# NOTE1 : You'll have to figure out yourself whether and how to install the necessary developer package
+# NOTE1 : Youll have to figure out yourself whether and how to install the necessary developer package
 # so that performance events can be used
 # NOTE 2: If you uncomment or recomment the line, remember to recompile EVERYTHING by selecting
 # "Rebuild all" from the Build menu
@@ -53,7 +53,7 @@ FORMS += \
 
 
 # If you uncomment the lines below and recompile EVERYTHING (by selecting "Rebuild all" from the Build menu),
-# you'll get a non-graphical command line version of the program (just like if you had compiled the program
+# youll get a non-graphical command line version of the program (just like if you had compiled the program
 # directly using the g++ command.
 #FORMS -= mainprogram.ui
 #CONFIG -= core gui qt
