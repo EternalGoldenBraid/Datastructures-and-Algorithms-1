@@ -1,13 +1,12 @@
-read "test-data.txt"
-all_towns
+add_town NEW1 new1 (0,0) 10
+add_town NEW2 new2 (5,5) 10
 towns_alphabetically
-add_town NEW1 new1 (1,5) 10
-add_town NEW2 new2 (2,5) 10
+add_town NEW3 new3 (8,9) 10
 towns_alphabetically
-add_town NEW3 new3 (3,5) 10
+add_town NEW4 new4 (0,8) 10
 towns_alphabetically
-add_town NEW4 new4 (3,5) 10
-towns_alphabetically
-add_town NEW5 new5 (3,5) 10
+add_town NEW5 new5 (0,5) 10
 towns_alphabetically
 
+add_vassalship NEW1 NEW2
+add_town NEW1 NEW1 (4,5) 10
