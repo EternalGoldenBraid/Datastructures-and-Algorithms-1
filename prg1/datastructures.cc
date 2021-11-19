@@ -43,6 +43,8 @@ Datastructures::Datastructures()
     towns_added_dist = {};
     towns_dist_sorted = {};
 
+    // For some reason compiler doesn't recognize the use of this variable.
+    // I use it to reserve memory for vectors used in path finding.
     size_t known_depth = 0;
 
 }
