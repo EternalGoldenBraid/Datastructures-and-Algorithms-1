@@ -190,7 +190,8 @@ public:
 
     // Estimate of performance: Constant time at the expense of higher memory.
     // Short rationale for estimate: Keeping a copy of TownIDs of direct
-    // vassals for each town in a vector, which is returned in the function.
+    // vassals for each town in a vector,
+    // which is returned in the function.
     std::vector<TownID> get_town_vassals(TownID id);
 
     // Estimate of performance: 
@@ -213,21 +214,28 @@ public:
     // sorted arrays is linear in their size.
     bool remove_town(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Time complexity O(nlog(n)) due to std::sort
+    // Short rationale for estimate: So dictated by cppreference.
     std::vector<TownID> towns_nearest(Coord coord);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Time complexity is linear in the number
+    // of towns.
+    // Short rationale for estimate: Every node besides the leaves 
+    // is visited in the function and a constant time operation performed 
+    // to store information regarding the maximum depth observed.
     std::vector<TownID> longest_vassal_path(TownID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: Time complexity is linear in the number
+    // of towns under direct or indirect vassalship with the query town
+    // + the master town if it exists.
+    // Short rationale for estimate: Constant time operations performed
+    // on all connected vassals and/or master town.
     int total_net_tax(TownID id);
 
 private:
     // Add stuff needed for your class implementation here
 
+    TownID NULL_MASTER = "";
     Distance dist(TownID &id, Coord &coord);
     Coord default_coord = { 0, 0 };
     void sort_by_distance();
@@ -237,9 +245,7 @@ private:
     class IdHash_ptr {
         public:
             size_t operator()(const Town *t) const{
-            //size_t operator()(const std::unique_ptr<Town> &t) const{
                 std::hash<std::string> hasher;
-
                 if (not t) return 0; 
                 return hasher(t->town_id);
             }
@@ -282,7 +288,10 @@ private:
     // used for reserving memory for relevant vectors.
     size_t known_depth;
     
-    bool DEBUG_;
+    void count_path(TownID &master, TownID &id, std::vector<TownID> &path,
+        unsigned int depth, std::pair<TownID, unsigned int> &max_depth);
+    int vassal_taxes(Town &town, unsigned int sum);
+
 
 };
 
