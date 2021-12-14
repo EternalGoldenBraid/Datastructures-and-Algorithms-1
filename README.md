@@ -64,3 +64,5 @@ I should probably be decaying every now and then or using an average instead of
 the all time high depending on the structures of the networks.
 If a small minority of paths are very long then this causes memory to be hoarded
 for no performance gain.
+
+### Repository missing components removed due to copyright issues with course materials.
